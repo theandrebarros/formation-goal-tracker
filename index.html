@@ -78,7 +78,7 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--content-defau
 
 /* ── Mobile overflow menu ────────────────────────────────────── */
 .mobile-menu-btn{display:none;}
-.mobile-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:50;min-width:180px;overflow:hidden;display:none;}
+.mobile-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--bg-surface);border:1px solid var(--border-default);border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:90;min-width:180px;overflow:hidden;display:none;}
 .mobile-dropdown.open{display:block;}
 .mobile-dropdown button,.mobile-dropdown a{width:100%;height:40px;padding:0 var(--sp-4);background:none;border:none;border-bottom:1px solid var(--border-subtle);color:var(--content-default);font-family:var(--font);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:var(--sp-3);text-decoration:none;}
 .mobile-dropdown button:last-child,.mobile-dropdown a:last-child{border-bottom:none;}
@@ -450,7 +450,14 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <div class="blockers-select" id="gm-blockers"><p style="font-size:11px;color:var(--content-subtle);padding:2px 4px">No other goals yet.</p></div>
         <p class="form-hint">Goals that must complete before this one.</p>
       </div>
+      <div class="form-group">
+        <label class="form-label">Callout quote <span style="color:var(--content-subtle);font-weight:400">(optional)</span></label>
+        <input class="form-input" id="gm-callout-text" type="text" placeholder="e.g. Ship it — it makes adoption frictionless." />
+        <input class="form-input" id="gm-callout-by" type="text" placeholder="Attribution, e.g. Matias" style="margin-top:var(--sp-1)" />
+        <p class="form-hint">Shown as a highlighted quote block on the card. Leave both blank to remove.</p>
+      </div>
     </div>
+    <div id="goal-modal-status" style="display:none;border-radius:var(--r);padding:var(--sp-2) var(--sp-3);font-size:12px;margin:var(--sp-3) var(--sp-5) 0"></div>
     <div class="modal-divider"></div>
     <div class="modal-footer">
       <div id="goal-modal-danger" style="display:none">
@@ -682,7 +689,8 @@ let state = {
   reviewMode: false, displayName: 'Andre', lastEditedBy: 'Andre', lastEditedAt: '',
   activityLog: [], goals: [],
 };
-let filterState = { query: '', status: 'all' };
+let filterState = (() => { try { return JSON.parse(sessionStorage.getItem('fd-filter'))||{query:'',status:'all'}; } catch { return {query:'',status:'all'}; } })();
+function saveFilter(){ sessionStorage.setItem('fd-filter', JSON.stringify(filterState)); }
 let goalModalState = { mode: 'add', editId: null, scope: 'personal' };
 let drag = { id: null, overId: null, pos: null };
 let gistEtag = null;
@@ -902,8 +910,9 @@ function checkOnboarding(){
 function dismissOnboarding(){localStorage.setItem('onboarding-dismissed','1');document.getElementById('onboarding-banner').classList.add('hidden');}
 
 /* ── Filter ─────────────────────────────────────────────────── */
-function updateFilter(){filterState.query=document.getElementById('search-input').value.toLowerCase();renderAll();}
-function setStatusFilter(s){filterState.status=s;document.querySelectorAll('.filter-pill').forEach(p=>p.classList.toggle('active',p.dataset.status===s));renderAll();}
+function updateFilter(){filterState.query=document.getElementById('search-input').value.toLowerCase();saveFilter();renderAll();}
+function setStatusFilter(s){filterState.status=s;document.querySelectorAll('.filter-pill').forEach(p=>p.classList.toggle('active',p.dataset.status===s));saveFilter();renderAll();}
+function restoreFilterUI(){document.getElementById('search-input').value=filterState.query;setStatusFilter(filterState.status);}
 
 function getFiltered(scope, qType) {
   let goals = state.goals.filter(g => g.scope === scope);
@@ -1016,7 +1025,7 @@ function openAddGoal(scope){
   goalModalState={mode:'add',editId:null,scope};
   document.getElementById('goal-modal-title').textContent='Add Goal';
   document.getElementById('goal-modal-danger').style.display='none';
-  ['gm-title','gm-stream','gm-objective','gm-kr','gm-quarter','gm-due'].forEach(id=>document.getElementById(id).value='');
+  ['gm-title','gm-stream','gm-objective','gm-kr','gm-quarter','gm-due','gm-callout-text','gm-callout-by'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('gm-scope').value=scope;
   document.getElementById('gm-status').value='active';
   document.getElementById('gm-title').classList.remove('error');
@@ -1037,6 +1046,8 @@ function openEditGoal(id){
   document.getElementById('gm-due').value=g.dueDate||'';
   document.getElementById('gm-scope').value=g.scope||'personal';
   document.getElementById('gm-status').value=g.status||'active';
+  document.getElementById('gm-callout-text').value=g.callout?.text||'';
+  document.getElementById('gm-callout-by').value=g.callout?.by||'';
   document.getElementById('gm-title').classList.remove('error');
   populateBlockers(id);
   document.getElementById('goal-modal-overlay').classList.remove('hidden');
@@ -1055,7 +1066,23 @@ function saveGoalModal(){
   const title=document.getElementById('gm-title').value.trim();
   if(!title){document.getElementById('gm-title').classList.add('error');document.getElementById('gm-title').focus();return;}
   const blockedBy=[...document.querySelectorAll('#gm-blockers input:checked')].map(el=>el.value);
-  const data={title,stream:document.getElementById('gm-stream').value.trim()||'General',objective:document.getElementById('gm-objective').value.trim()||'—',kr:document.getElementById('gm-kr').value.trim()||'—',quarter:document.getElementById('gm-quarter').value.trim()||'—',dueDate:document.getElementById('gm-due').value||'',scope:document.getElementById('gm-scope').value,status:document.getElementById('gm-status').value,blockedBy};
+  // Detect cycles: does any selected blocker eventually depend on the current goal?
+  const editId=goalModalState.editId;
+  if(editId){
+    function hasCycle(id,visited=new Set()){
+      if(id===editId)return true;if(visited.has(id))return false;visited.add(id);
+      const g=state.goals.find(x=>x.id===id);return(g?.blockedBy||[]).some(b=>hasCycle(b,visited));
+    }
+    const cyclic=blockedBy.filter(b=>hasCycle(b));
+    if(cyclic.length){const names=cyclic.map(b=>state.goals.find(g=>g.id===b)?.title||b);setModalStatus('goal','error',`Circular dependency: "${names.join('", "')}" already depends on this goal.`);return;}
+  }
+  const calloutText=document.getElementById('gm-callout-text').value.trim();
+  const calloutBy=document.getElementById('gm-callout-by').value.trim();
+  const callout=calloutText?{text:calloutText,by:calloutBy||''}:null;
+  const quarter=document.getElementById('gm-quarter').value.trim();
+  const validQuarter=/^(Q[1-4]([–\-]Q[1-4])?[+]?|20\d{2}|—?)$/.test(quarter)||!quarter;
+  if(!validQuarter){setModalStatus('goal','error','Quarter format: Q1, Q2, Q2+, Q1–Q3, or 2026.');return;}
+  const data={title,stream:document.getElementById('gm-stream').value.trim()||'General',objective:document.getElementById('gm-objective').value.trim()||'—',kr:document.getElementById('gm-kr').value.trim()||'—',quarter:quarter||'—',dueDate:document.getElementById('gm-due').value||'',scope:document.getElementById('gm-scope').value,status:document.getElementById('gm-status').value,blockedBy,callout};
   if(goalModalState.mode==='add'){
     const g={id:uid(),progress:0,comments:[],notes:'',managerNote:'',callout:null,...data};
     state.goals.push(g);logActivity('goal_added',g);
@@ -1191,7 +1218,7 @@ async function saveSettings(){
   } else closeSettings();
 }
 function setModalStatus(modal,type,msg){
-  const el=document.getElementById(modal==='settings'?'settings-status':'settings-status');if(!el)return;
+  const el=document.getElementById(modal==='settings'?'settings-status':'goal-modal-status');if(!el)return;
   if(!msg){el.style.display='none';return;}
   const bg={info:'var(--info-bg)',success:'var(--positive-bg)',error:'var(--alert-bg)'};const fg={info:'var(--info)',success:'var(--positive)',error:'var(--alert)'};
   el.style.cssText=`display:block;background:${bg[type]||'var(--bg-layer)'};color:${fg[type]||'var(--content-default)'};`;
@@ -1222,6 +1249,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSettings();clo
 
   renderAll();updateStats();updateTabCounts();renderActivityLog();
   switchTab(state.activeScope||'personal');
+  restoreFilterUI();
   if(state.laterOpen){document.getElementById('later-toggle').classList.add('open');document.getElementById('later-goals').classList.add('open');}
   if(state.prevOpen){document.getElementById('prev-toggle').classList.add('open');document.getElementById('prev-goals').classList.add('open');}
   if(state.activityOpen){document.getElementById('activity-toggle').classList.add('open');document.getElementById('activity-content').classList.add('open');}
