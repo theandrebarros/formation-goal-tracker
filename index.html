@@ -990,6 +990,7 @@ function initDragDrop(gridId){
   grid.addEventListener('dragstart',e=>{
     const card=e.target.closest('.goal-card');if(!card)return;
     drag.id=card.dataset.id;
+    drag.sourceGridId=gridId;
     grid.classList.add('drag-active');
     requestAnimationFrame(()=>card.classList.add('dragging'));
   });
@@ -1005,6 +1006,11 @@ function initDragDrop(gridId){
   grid.addEventListener('drop',e=>{
     e.preventDefault();
     if(!drag.id||!drag.overId||drag.id===drag.overId){cleanDrag(grid);return;}
+    if(drag.sourceGridId&&drag.sourceGridId!==gridId){
+      cleanDrag(grid);
+      showToast('↕️','Drag reorders within a section. Use the edit button to change a goal\'s quarter.');
+      return;
+    }
     const goals=[...state.goals];
     const fromIdx=goals.findIndex(g=>g.id===drag.id);
     const [moved]=goals.splice(fromIdx,1);
@@ -1018,7 +1024,7 @@ function initDragDrop(gridId){
 function cleanDrag(grid){
   grid?.querySelectorAll('.goal-card').forEach(c=>c.classList.remove('drag-over-top','drag-over-bottom','dragging'));
   grid?.classList.remove('drag-active');
-  drag={id:null,overId:null,pos:null};
+  drag={id:null,overId:null,pos:null,sourceGridId:null};
 }
 
 /* ── Goal CRUD ──────────────────────────────────────────────── */
