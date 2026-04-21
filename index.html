@@ -597,8 +597,10 @@ body {
           <label class="form-label" for="input-pat">Personal Access Token</label>
           <input class="form-input" id="input-pat" type="password" placeholder="github_pat_…" autocomplete="off" />
           <p class="form-hint">
-            Needs <strong>gist: read + write</strong> scope only.
-            <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">Create fine-grained token →</a>
+            Fine-grained token: under <strong>Account permissions → Gists → Read and write</strong>.<br>
+            Classic token: tick the <strong>gist</strong> scope.<br>
+            <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">Create classic token →</a> &nbsp;·&nbsp;
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Create fine-grained token →</a>
           </p>
         </div>
         <div class="form-group">
@@ -894,12 +896,14 @@ async function createNewGist() {
       headers: { Authorization: `token ${patVal}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({ description: 'Formation 2026 Goal Tracker', public: false, files: { [GIST_FILE]: { content: seed } } }),
     });
+    if (r.status === 403) throw new Error('403 — token lacks Gist permission. Re-create the token with Account permissions → Gists → Read and write.');
+    if (r.status === 401) throw new Error('401 — token invalid or expired. Generate a new one.');
     if (!r.ok) throw new Error(`GitHub API ${r.status}`);
     const data = await r.json();
     document.getElementById('input-gist').value = data.id;
-    setModalStatus('success', `Gist created: ${data.id} — share this ID with Matias.`);
+    setModalStatus('success', `Gist created! ID: ${data.id} — copy and send to Matias.`);
   } catch (e) {
-    setModalStatus('error', `Failed: ${e.message}`);
+    setModalStatus('error', e.message);
   }
 }
 
