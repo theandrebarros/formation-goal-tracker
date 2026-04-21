@@ -582,8 +582,8 @@ let state = {
   schemaVersion: 3,
   theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
   activeScope: 'personal',
-  laterOpen: false,
-  activityOpen: false,
+  laterOpen: true,
+  activityOpen: true,
   reviewMode: false,
   displayName: 'Andre',
   lastEditedBy: 'Andre',
@@ -663,8 +663,8 @@ function loadLocal() {
     const saved = migrate(JSON.parse(raw));
     state.theme        = saved.theme || state.theme;
     state.activeScope  = saved.activeScope || 'personal';
-    state.laterOpen    = saved.laterOpen || false;
-    state.activityOpen = saved.activityOpen || false;
+    state.laterOpen    = saved.laterOpen    ?? true;
+    state.activityOpen = saved.activityOpen ?? true;
     state.displayName  = saved.displayName || 'Andre';
     state.lastEditedBy = saved.lastEditedBy || state.displayName;
     state.lastEditedAt = saved.lastEditedAt || '';
