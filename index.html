@@ -567,6 +567,13 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Add goal
     </button>
+    <div id="prev-section" style="display:none">
+      <div class="collapsible-heading" id="prev-toggle" onclick="togglePrev()">
+        <svg class="collapsible-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 3 11 8 6 13"/></svg>
+        <h2>Previous Quarter</h2><div class="section-line"></div>
+      </div>
+      <div class="collapsible-content" id="prev-goals"></div>
+    </div>
     <div class="collapsible-heading" id="later-toggle" onclick="toggleLater()">
       <svg class="collapsible-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 3 11 8 6 13"/></svg>
       <h2>Later Quarters</h2><div class="section-line"></div>
@@ -627,18 +634,26 @@ function currentQuarter() {
   const m = new Date().getMonth();
   return m < 3 ? 'Q1' : m < 6 ? 'Q2' : m < 9 ? 'Q3' : 'Q4';
 }
+const QUARTER_RANK = {'Q1':1,'Q2':2,'Q3':3,'Q4':4};
 function isCurrentQ(g) {
   const cq = currentQuarter(), q = g.quarter || '';
   if (!q || q === '2026') return true;
-  // Past quarters stay visible in the main section (not buried in "Later")
-  const quarterRank = {'Q1':1,'Q2':2,'Q3':3,'Q4':4};
-  const cqRank = quarterRank[cq] || 1;
-  if (quarterRank[q] && quarterRank[q] <= cqRank) return true;
+  if (q === cq) return true;
   if (q.includes(cq)) return true;
-  if (q.endsWith('+')) return cqRank >= (quarterRank[q.slice(0,2)] || 1);
-  // Range like "Q1–Q2": current or past if range start <= cq
+  if (q.endsWith('+')) return (QUARTER_RANK[cq]||1) >= (QUARTER_RANK[q.slice(0,2)]||1);
   const rangeMatch = q.match(/^(Q[1-4])[–\-](Q[1-4])$/);
-  if (rangeMatch && quarterRank[rangeMatch[1]] <= cqRank) return true;
+  if (rangeMatch) { const r1=QUARTER_RANK[rangeMatch[1]]||1, r2=QUARTER_RANK[rangeMatch[2]]||4, cqr=QUARTER_RANK[cq]||1; return cqr>=r1&&cqr<=r2; }
+  return false;
+}
+function isPrevQ(g) {
+  const cq = currentQuarter(), q = g.quarter || '';
+  if (!q || q === '2026') return false;
+  const cqRank = QUARTER_RANK[cq] || 1;
+  // Single past quarter
+  if (QUARTER_RANK[q] && QUARTER_RANK[q] < cqRank) return true;
+  // Range that has already ended: end quarter < current
+  const rangeMatch = q.match(/^(Q[1-4])[–\-](Q[1-4])$/);
+  if (rangeMatch && (QUARTER_RANK[rangeMatch[2]]||4) < cqRank) return true;
   return false;
 }
 
@@ -664,7 +679,7 @@ const SEED = [
 /* ── State ──────────────────────────────────────────────────── */
 let state = {
   schemaVersion: 4, theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
-  activeScope: 'personal', laterOpen: true, activityOpen: true,
+  activeScope: 'personal', laterOpen: true, prevOpen: false, activityOpen: true,
   reviewMode: false, displayName: 'Andre', lastEditedBy: 'Andre', lastEditedAt: '',
   activityLog: [], goals: [],
 };
@@ -742,6 +757,7 @@ function loadLocal() {
     state.theme       = saved.theme || state.theme;
     state.activeScope = saved.activeScope || 'personal';
     state.laterOpen   = saved.laterOpen   ?? true;
+    state.prevOpen    = saved.prevOpen    ?? false;
     state.activityOpen= saved.activityOpen?? true;
     state.displayName = saved.displayName || 'Andre';
     state.lastEditedBy= saved.lastEditedBy || state.displayName;
@@ -752,7 +768,7 @@ function loadLocal() {
   } catch { return false; }
 }
 function saveLocal() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion:4, theme:state.theme, activeScope:state.activeScope, laterOpen:state.laterOpen, activityOpen:state.activityOpen, displayName:state.displayName, lastEditedBy:state.lastEditedBy, lastEditedAt:state.lastEditedAt, activityLog:state.activityLog, goals:state.goals }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion:4, theme:state.theme, activeScope:state.activeScope, laterOpen:state.laterOpen, prevOpen:state.prevOpen, activityOpen:state.activityOpen, displayName:state.displayName, lastEditedBy:state.lastEditedBy, lastEditedAt:state.lastEditedAt, activityLog:state.activityLog, goals:state.goals }));
   bc?.postMessage({ type:'state-updated', by:TAB_ID });
 }
 
@@ -863,6 +879,7 @@ function updateTabCounts(){['personal','team','org'].forEach(s=>document.getElem
 
 /* ── Collapsibles ───────────────────────────────────────────── */
 function toggleLater(){state.laterOpen=!state.laterOpen;document.getElementById('later-toggle').classList.toggle('open',state.laterOpen);document.getElementById('later-goals').classList.toggle('open',state.laterOpen);scheduleSave();}
+function togglePrev(){state.prevOpen=!state.prevOpen;document.getElementById('prev-toggle').classList.toggle('open',state.prevOpen);document.getElementById('prev-goals').classList.toggle('open',state.prevOpen);scheduleSave();}
 function toggleActivity(){state.activityOpen=!state.activityOpen;document.getElementById('activity-toggle').classList.toggle('open',state.activityOpen);document.getElementById('activity-content').classList.toggle('open',state.activityOpen);scheduleSave();}
 
 /* ── Review ─────────────────────────────────────────────────── */
@@ -892,7 +909,8 @@ function setStatusFilter(s){filterState.status=s;document.querySelectorAll('.fil
 function getFiltered(scope, qType) {
   let goals = state.goals.filter(g => g.scope === scope);
   if (qType === 'current') goals = goals.filter(g => isCurrentQ(g));
-  if (qType === 'later')   goals = goals.filter(g => !isCurrentQ(g));
+  if (qType === 'prev')    goals = goals.filter(g => isPrevQ(g));
+  if (qType === 'later')   goals = goals.filter(g => !isCurrentQ(g) && !isPrevQ(g));
   if (filterState.status !== 'all') goals = goals.filter(g => g.status === filterState.status);
   if (filterState.query) goals = goals.filter(g =>
     g.title.toLowerCase().includes(filterState.query) ||
@@ -1110,11 +1128,14 @@ function refreshCard(id){const g=state.goals.find(x=>x.id===id);const el=documen
 
 function renderAll(){
   const cq=currentQuarter();
-  const qRank={'Q1':1,'Q2':2,'Q3':3,'Q4':4};
-  const hasPast=state.goals.some(g=>g.scope==='personal'&&g.quarter&&qRank[g.quarter]&&qRank[g.quarter]<(qRank[cq]||1));
-  document.getElementById('current-q-label').textContent=hasPast?`${cq} & Earlier`:`${cq} Priority`;
+  document.getElementById('current-q-label').textContent=`${cq} Priority`;
+  // Show/hide the "Previous Quarter" section based on whether any prev goals exist
+  const hasPrev=state.goals.some(g=>g.scope==='personal'&&isPrevQ(g));
+  const prevSection=document.getElementById('prev-section');
+  if(prevSection) prevSection.style.display=hasPrev?'':'none';
   const grids=[
     {id:'current-goals',scope:'personal',qType:'current'},
+    {id:'prev-goals',scope:'personal',qType:'prev'},
     {id:'later-goals',scope:'personal',qType:'later'},
     {id:'team-goals',scope:'team',qType:null},
     {id:'org-goals',scope:'org',qType:null},
@@ -1203,6 +1224,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeSettings();clo
   renderAll();updateStats();updateTabCounts();renderActivityLog();
   switchTab(state.activeScope||'personal');
   if(state.laterOpen){document.getElementById('later-toggle').classList.add('open');document.getElementById('later-goals').classList.add('open');}
+  if(state.prevOpen){document.getElementById('prev-toggle').classList.add('open');document.getElementById('prev-goals').classList.add('open');}
   if(state.activityOpen){document.getElementById('activity-toggle').classList.add('open');document.getElementById('activity-content').classList.add('open');}
 
   checkOnboarding();
