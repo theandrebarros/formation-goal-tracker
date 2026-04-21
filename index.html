@@ -630,9 +630,15 @@ function currentQuarter() {
 function isCurrentQ(g) {
   const cq = currentQuarter(), q = g.quarter || '';
   if (!q || q === '2026') return true;
-  if (q === cq) return true;
+  // Past quarters stay visible in the main section (not buried in "Later")
+  const quarterRank = {'Q1':1,'Q2':2,'Q3':3,'Q4':4};
+  const cqRank = quarterRank[cq] || 1;
+  if (quarterRank[q] && quarterRank[q] <= cqRank) return true;
   if (q.includes(cq)) return true;
-  if (q.endsWith('+')) return cq >= q.slice(0, 2);
+  if (q.endsWith('+')) return cqRank >= (quarterRank[q.slice(0,2)] || 1);
+  // Range like "Q1–Q2": current or past if range start <= cq
+  const rangeMatch = q.match(/^(Q[1-4])[–\-](Q[1-4])$/);
+  if (rangeMatch && quarterRank[rangeMatch[1]] <= cqRank) return true;
   return false;
 }
 
@@ -1104,7 +1110,9 @@ function refreshCard(id){const g=state.goals.find(x=>x.id===id);const el=documen
 
 function renderAll(){
   const cq=currentQuarter();
-  document.getElementById('current-q-label').textContent=`${cq} Priority`;
+  const qRank={'Q1':1,'Q2':2,'Q3':3,'Q4':4};
+  const hasPast=state.goals.some(g=>g.scope==='personal'&&g.quarter&&qRank[g.quarter]&&qRank[g.quarter]<(qRank[cq]||1));
+  document.getElementById('current-q-label').textContent=hasPast?`${cq} & Earlier`:`${cq} Priority`;
   const grids=[
     {id:'current-goals',scope:'personal',qType:'current'},
     {id:'later-goals',scope:'personal',qType:'later'},
