@@ -1117,7 +1117,7 @@ function cardHTML(g){
     <div class="expandable goal-notes${hasNotes?' open':''}" id="notes-area-${g.id}"><textarea placeholder="Context, blockers, progress…" onblur="saveNotes('${g.id}',this.value)">${g.notes||''}</textarea></div>
     <div class="notes-read-text" id="notes-read-${g.id}">${g.notes||'No notes yet.'}</div>
     ${nc?commentsHTML(g):`<div class="expandable" id="comments-area-${g.id}"><div class="comments-list"></div><div class="comment-input-row"><input class="comment-input" id="comment-input-${g.id}" placeholder="Leave a comment…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitComment('${g.id}')}"/><button class="btn-secondary" onclick="submitComment('${g.id}')">Post</button></div></div>`}
-    <div class="expandable${hasMgr?' open':''}" id="mgr-area-${g.id}"><textarea class="mgr-note-input" placeholder="Matias's notes on this goal…" onblur="saveMgrNote('${g.id}',this.value)">${g.managerNote||''}</textarea></div>
+    <div class="expandable${hasMgr?' open':''}" id="mgr-area-${g.id}" style="margin-top:var(--sp-3)"><textarea class="mgr-note-input" placeholder="Matias's notes on this goal…" onblur="saveMgrNote('${g.id}',this.value)">${g.managerNote||''}</textarea></div>
     <div class="mgr-read-text" id="mgr-read-${g.id}">${g.managerNote||'No manager note yet.'}</div>
   </div>
 </div>`;
