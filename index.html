@@ -360,13 +360,16 @@ select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csv
         <span class="modal-section-label">GitHub sync</span>
         <div class="form-group">
           <label class="form-label" for="input-pat">Personal Access Token</label>
-          <input class="form-input" id="input-pat" type="password" placeholder="github_pat_…" autocomplete="off" />
-          <p class="form-hint">
+          <input class="form-input" id="input-pat" type="password" placeholder="github_pat_…" autocomplete="current-password" />
+          <div style="display:flex;align-items:center;gap:var(--sp-2);margin-top:var(--sp-2)">
+            <input type="checkbox" id="pat-remember" style="width:14px;height:14px;cursor:pointer;accent-color:var(--product-primary)" />
+            <label for="pat-remember" style="font-size:12px;color:var(--content-subtle);cursor:pointer">Remember for 30 days on this device</label>
+          </div>
+          <p class="form-hint" style="margin-top:var(--sp-2)">
             Fine-grained: <strong>Account permissions → Gists → Read and write</strong><br>
             Classic: tick the <strong>gist</strong> scope.<br>
             <a href="https://github.com/settings/tokens/new" target="_blank" rel="noopener">Classic →</a> &nbsp;·&nbsp;
-            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained →</a><br>
-            <em>Token is session-only — you'll re-enter it each browser session.</em>
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Fine-grained →</a>
           </p>
         </div>
         <div class="form-group">
@@ -725,11 +728,26 @@ function unresolvedBlockers(g) {
 }
 
 /* ── Credentials ────────────────────────────────────────────── */
-// PAT lives in sessionStorage (clears on tab/window close); Gist ID in localStorage (safe to persist).
+// PAT: sessionStorage by default (clears on tab close). If user checks "Remember 30 days",
+// stored in localStorage with an expiry timestamp; auto-cleared when expired.
+const PAT_KEY = CREDS_KEY + '-pat';
+const PAT_EXP_KEY = CREDS_KEY + '-pat-exp';
+const PAT_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days in ms
+
 function getCreds() {
   try {
-    const gistId = JSON.parse(localStorage.getItem(CREDS_KEY))?.gistId || '';
-    const pat = sessionStorage.getItem(CREDS_KEY + '-pat') || '';
+    const stored = JSON.parse(localStorage.getItem(CREDS_KEY)) || {};
+    const gistId = stored.gistId || '';
+    // Check localStorage PAT (remembered) — clear if expired
+    let pat = '';
+    const remembered = localStorage.getItem(PAT_KEY);
+    const exp = parseInt(localStorage.getItem(PAT_EXP_KEY) || '0', 10);
+    if (remembered && exp && Date.now() < exp) {
+      pat = remembered;
+    } else {
+      if (remembered) { localStorage.removeItem(PAT_KEY); localStorage.removeItem(PAT_EXP_KEY); }
+      pat = sessionStorage.getItem(PAT_KEY) || '';
+    }
     return { pat, gistId };
   } catch { return {}; }
 }
@@ -737,8 +755,16 @@ function saveCreds(c) {
   const prev = (() => { try { return JSON.parse(localStorage.getItem(CREDS_KEY)) || {}; } catch { return {}; } })();
   localStorage.setItem(CREDS_KEY, JSON.stringify({ gistId: c.gistId ?? prev.gistId ?? '' }));
   if (c.pat !== undefined) {
-    if (c.pat) sessionStorage.setItem(CREDS_KEY + '-pat', c.pat);
-    else sessionStorage.removeItem(CREDS_KEY + '-pat');
+    sessionStorage.removeItem(PAT_KEY);
+    localStorage.removeItem(PAT_KEY); localStorage.removeItem(PAT_EXP_KEY);
+    if (c.pat) {
+      if (c.remember) {
+        localStorage.setItem(PAT_KEY, c.pat);
+        localStorage.setItem(PAT_EXP_KEY, String(Date.now() + PAT_TTL));
+      } else {
+        sessionStorage.setItem(PAT_KEY, c.pat);
+      }
+    }
   }
 }
 
@@ -1208,11 +1234,12 @@ function showToast(icon,msg,actionLabel,actionFn){
 function hideToast(){document.getElementById('toast-el').classList.add('hidden');clearTimeout(toastTimer);}
 
 /* ── Settings ───────────────────────────────────────────────── */
-function openSettings(){const c=getCreds();document.getElementById('input-name').value=state.displayName;document.getElementById('input-pat').value=c.pat||'';document.getElementById('input-gist').value=c.gistId||'';setModalStatus('settings','','');document.getElementById('settings-overlay').classList.remove('hidden');}
+function openSettings(){const c=getCreds();document.getElementById('input-name').value=state.displayName;document.getElementById('input-pat').value=c.pat||'';document.getElementById('input-gist').value=c.gistId||'';document.getElementById('pat-remember').checked=!!localStorage.getItem(PAT_KEY);setModalStatus('settings','','');document.getElementById('settings-overlay').classList.remove('hidden');}
 function closeSettings(){document.getElementById('settings-overlay').classList.add('hidden');}
 async function saveSettings(){
   const name=document.getElementById('input-name').value.trim(),pat=document.getElementById('input-pat').value.trim(),gistId=document.getElementById('input-gist').value.trim();
-  if(name)state.displayName=name;saveCreds({pat,gistId});saveLocal();
+  const remember=document.getElementById('pat-remember').checked;
+  if(name)state.displayName=name;saveCreds({pat,gistId,remember});saveLocal();
   if(pat&&gistId){
     setModalStatus('settings','info','Connecting…');const remote=await loadRemote();
     if(remote){
@@ -1231,7 +1258,7 @@ function setModalStatus(modal,type,msg){
   el.style.cssText=`display:block;background:${bg[type]||'var(--bg-layer)'};color:${fg[type]||'var(--content-default)'};`;
   el.textContent=msg;
 }
-function clearCreds(){if(!confirm('Clear GitHub credentials from this device?'))return;saveCreds({pat:'',gistId:''});stopPolling();setSyncBadge('offline','No sync');closeSettings();showToast('🗑️','Credentials cleared.');}
+function clearCreds(){if(!confirm('Clear GitHub credentials from this device?'))return;saveCreds({pat:'',gistId:''});localStorage.removeItem(PAT_KEY);localStorage.removeItem(PAT_EXP_KEY);stopPolling();setSyncBadge('offline','No sync');closeSettings();showToast('🗑️','Credentials cleared.');}
 function confirmReset(){
   if(!confirm('Reset all goal data? Notes, statuses, comments and activity will be cleared on this device.'))return;
   localStorage.removeItem(STORAGE_KEY);state.goals=SEED.map(s=>({...s}));state.activityLog=[];state.reviewMode=false;state.laterOpen=true;state.activityOpen=true;
