@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en" data-mode="dark">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Formation 2026 · Goal Tracker</title>
+<script>document.documentElement.setAttribute('data-mode',(()=>{try{const s=JSON.parse(localStorage.getItem('formation-goals-v2'));if(s?.theme)return s.theme;}catch{}return window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';})())</script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet" />
@@ -768,7 +769,7 @@ const SEED_GOALS = [
 /* ── State ──────────────────────────────────────────────────────── */
 let state = {
   schemaVersion: 2,
-  theme: 'dark',
+  theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
   activeScope: 'personal',
   laterOpen: false,
   reviewMode: false,
@@ -799,7 +800,7 @@ function loadLocal() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return false;
     const saved = migrate(JSON.parse(raw));
-    state.theme       = saved.theme || 'dark';
+    state.theme       = saved.theme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     state.activeScope = saved.activeScope || 'personal';
     state.laterOpen   = saved.laterOpen || false;
     state.displayName = saved.displayName || 'Andre';
