@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en" data-mode="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Formation 2026 · Goal Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+/* ── Formation tokens ─────────────────────────────────────────────── */
+:root {
+  --bg-base:          #EAF0F6;
+  --bg-surface:       #ffffff;
+  --bg-layer:         #F7FBFF;
+  --bg-hover:         #EAF4FF;
+  --content-default:  #1C1D1D;
+  --content-strong:   #05285A;
+  --content-subtle:   #6A6F73;
+  --product-primary:  #0070EB;
+  --product-primary-l1: #2B90FF;
+  --brand-tertiary:   #FFDC2E;
+  --border-default:   #B0B7BF;
+  --border-subtle:    #C6D3E1;
+  --status-positive:  #00732C;  --status-positive-bg: #E9F8EF;
+  --status-positive-border: #128000;
+  --status-warning:   #A44800;
+  --status-warning-bg: #FFF1E6;
+  --status-warning-border: #FF8C31;
+  --status-info:      #004EA3;
+  --status-info-bg:   #EAF4FF;
+  --status-info-border: #005FC8;
+  --status-alert:     #C8002B;
+  --status-alert-bg:  #FDECED;
+  --status-alert-border: #D22839;
+  --status-neutral:   #6A6F73;
+  --status-neutral-bg: #EAF0F6;
+  --status-neutral-border: #B0B7BF;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
+  --sp-5:20px; --sp-6:24px; --sp-8:32px; --sp-10:40px; --sp-16:64px;
+  --radius-sm: 4px;
+  --radius-pill: 9999px;
+  --font-ui: 'Inter', system-ui, sans-serif;
+  --font-label: 'Roboto Condensed', 'Arial Narrow', sans-serif;
+}
+[data-mode="dark"] {
+  --bg-base:          #0a0a0a;
+  --bg-surface:       #1C1D1D;
+  --bg-layer:         #2B2D2E;
+  --bg-hover:         #3C3E40;
+  --content-default:  #CED4DB;
+  --content-strong:   #ffffff;
+  --content-subtle:   #969DA3;
+  --border-default:   #6A6F73;
+  --border-subtle:    #4D5153;
+  --status-positive:  #7FD9A1;
+  --status-positive-bg: rgba(127,217,161,0.12);
+  --status-positive-border: #128000;
+  --status-warning:   #F5A623;
+  --status-warning-bg: rgba(245,166,35,0.12);
+  --status-warning-border: #FF8C31;
+  --status-info:      #64AEFF;
+  --status-info-bg:   rgba(100,174,255,0.12);
+  --status-info-border: #005FC8;
+  --status-alert:     #F198A1;
+  --status-alert-bg:  rgba(241,152,161,0.12);
+  --status-alert-border: #D22839;
+  --status-neutral:   #969DA3;
+  --status-neutral-bg: rgba(150,157,163,0.12);
+  --status-neutral-border: #6A6F73;
+}
+
+/* ── Reset ────────────────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:16px; }
+body {
+  font-family: var(--font-ui);
+  background: var(--bg-base);
+  color: var(--content-default);
+  min-height: 100vh;
+  transition: background 0.2s, color 0.2s;
+  line-height: 1.5;
+}
+
+/* ── Layout ───────────────────────────────────────────────────────── */
+.app-shell {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: var(--sp-6) var(--sp-4) var(--sp-16);
+}
+
+/* ── Header ───────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+  flex-wrap: wrap;
+}
+.header-eyebrow {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--content-subtle);
+  margin-bottom: 2px;
+}
+.header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--content-strong);
+  line-height: 1.2;
+}
+.header-subtitle {
+  font-size: 13px;
+  color: var(--content-subtle);
+  margin-top: 2px;
+}
+.header-subtitle span { color: var(--product-primary); font-weight: 600; }
+.header-date {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--content-subtle);
+  margin-top: var(--sp-2);
+}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  flex-shrink: 0;
+  padding-top: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────── */
+.btn-icon {
+  width: 34px; height: 34px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--content-default);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  transition: background 0.15s, border-color 0.15s;
+  flex-shrink: 0;
+}
+.btn-icon:hover { background: var(--bg-hover); border-color: var(--product-primary); }
+.btn-text {
+  height: 34px;
+  padding: 0 var(--sp-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface);
+  color: var(--content-default);
+  cursor: pointer;
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  text-decoration: none;
+}
+.btn-text:hover { background: var(--bg-hover); border-color: var(--product-primary); }
+.btn-text.active {
+  background: var(--product-primary);
+  border-color: var(--product-primary);
+  color: #fff;
+}
+.btn-text.active:hover { background: #005FC8; }
+
+/* ── Sync badge ───────────────────────────────────────────────────── */
+.sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  height: 24px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-label);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-layer);
+  color: var(--content-subtle);
+  cursor: default;
+  transition: all 0.2s;
+}
+.sync-badge.syncing { border-color: var(--status-info-border); color: var(--status-info); background: var(--status-info-bg); }
+.sync-badge.synced  { border-color: var(--status-positive-border); color: var(--status-positive); background: var(--status-positive-bg); }
+.sync-badge.error   { border-color: var(--status-alert-border); color: var(--status-alert); background: var(--status-alert-bg); }
+.sync-badge.offline { border-color: var(--border-subtle); color: var(--content-subtle); }
+.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.sync-badge.syncing .sync-dot { animation: pulse 1s infinite; }
+
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: var(--sp-6);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.tab-btn {
+  padding: var(--sp-2) var(--sp-4);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--content-subtle);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab-btn:hover { color: var(--content-default); }
+.tab-btn.active { color: var(--product-primary); border-bottom-color: var(--product-primary); }
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-layer);
+  color: var(--content-subtle);
+}
+.tab-btn.active .tab-count { background: var(--status-info-bg); color: var(--status-info); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ── Stats strip ──────────────────────────────────────────────────── */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-6);
+}
+@media (max-width: 560px) { .stats-strip { grid-template-columns: repeat(2,1fr); } }
+.stat-tile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-4);
+  text-align: center;
+}
+.stat-value { font-size: 30px; font-weight: 700; color: var(--content-strong); line-height: 1; }
+.stat-value.accent { color: var(--product-primary); }
+.stat-value.positive { color: var(--status-positive); }
+.stat-label {
+  font-family: var(--font-label);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--content-subtle);
+  margin-top: 2px;
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────── */
+.progress-bar-wrap {
+  height: 3px;
+  background: var(--border-subtle);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: var(--sp-8);
+}
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #005FC8, #0070EB);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+
+/* ── Section heading ──────────────────────────────────────────────── */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.section-heading h2 {
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-label);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--content-subtle);
+  white-space: nowrap;
+}
+.section-line { flex: 1; height: 1px; background: var(--border-subtle); }
+
+/* ── Goal cards ───────────────────────────────────────────────────── */
+.goals-grid { display: flex; flex-direction: column; gap: var(--sp-4); margin-bottom: var(--sp-8); }
+.goal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: var(--sp-5);
+  transition: border-color 0.15s;
+}
+.goal-card:hover { border-color: var(--border-default); }
+.goal-card.done { opacity: 0.7; border-color: var(--status-positive-border); }
+.goal-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.goal-check {
+  flex-shrink: 0;
+  width: 20px; height: 20px;
+  border-radius: 4px;
+  border: 2px solid var(--border-default);
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  margin-top: 2px;
+}
+.goal-check:hover { border-color: var(--product-primary); background: var(--bg-hover); }
+.goal-card.done .goal-check { border-color: var(--status-positive-border); background: var(--status-positive-bg); color: var(--status-positive); }
+.goal-meta { flex: 1; min-width: 0; }
+.goal-stream { font-family: var(--font-label); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--content-subtle); margin-bottom: 2px; }
+.goal-title { font-size: 15px; font-weight: 700; color: var(--content-strong); line-height: 1.3; }
+.goal-card.done .goal-title { text-decoration: line-through; color: var(--content-subtle); }
+
+/* Pill */
+.pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-label);
+  font-size: 9px; font-weight: 700;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  border: 1px solid; white-space: nowrap;
+  cursor: pointer; transition: filter 0.15s; user-select: none;
+}
+.pill:hover { filter: brightness(0.92); }
+.pill-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.pill-active   { color:var(--status-info);     background:var(--status-info-bg);     border-color:var(--status-info-border);     }
+.pill-done     { color:var(--status-positive);  background:var(--status-positive-bg);  border-color:var(--status-positive-border); }
+.pill-upcoming { color:var(--status-warning);   background:var(--status-warning-bg);   border-color:var(--status-warning-border);  }
+.pill-no-kr    { color:var(--status-neutral);   background:var(--status-neutral-bg);   border-color:var(--status-neutral-border);  }
+.pill-active   .pill-dot { background:var(--status-info);     }
+.pill-done     .pill-dot { background:var(--status-positive); }
+.pill-upcoming .pill-dot { background:var(--status-warning);  }
+.pill-no-kr    .pill-dot { background:var(--status-neutral);  }
+
+/* Goal body */
+.goal-body { padding-left: calc(20px + var(--sp-3)); }
+.goal-kr { font-size: 12px; color: var(--content-subtle); margin-bottom: var(--sp-3); line-height: 1.4; }
+.goal-kr strong { font-weight: 600; color: var(--content-default); }
+.goal-callout {
+  background: var(--bg-layer);
+  border-left: 3px solid var(--product-primary);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: var(--sp-2) var(--sp-3);
+  font-size: 12px; color: var(--content-subtle);
+  margin-bottom: var(--sp-3); font-style: italic; line-height: 1.5;
+}
+.goal-callout cite { font-style:normal; font-weight:600; color:var(--content-default); font-size:11px; display:block; margin-top:3px; }
+
+/* Notes */
+.goal-notes-toggle {
+  background: none; border: none;
+  color: var(--product-primary); font-family: var(--font-ui);
+  font-size: 11px; font-weight: 600; cursor: pointer;
+  padding: 0; display: flex; align-items: center; gap: 4px;
+  margin-bottom: var(--sp-2);
+}
+.goal-notes-toggle:hover { color: var(--product-primary-l1); }
+.goal-notes-toggle svg { transition: transform 0.2s; }
+.goal-notes-toggle.open svg { transform: rotate(90deg); }
+.goal-notes { display: none; }
+.goal-notes.open { display: block; }
+.goal-notes textarea {
+  width: 100%; min-height: 72px;
+  background: var(--bg-layer);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--content-default);
+  font-family: var(--font-ui); font-size: 12px; line-height: 1.5;
+  padding: var(--sp-2) var(--sp-3); resize: vertical; outline: none;
+  transition: border-color 0.15s;
+}
+.goal-notes textarea:focus { border-color: var(--product-primary); }
+.goal-notes textarea::placeholder { color: var(--content-subtle); }
+.goal-notes-text {
+  display: none;
+  font-size: 12px; color: var(--content-subtle);
+  background: var(--bg-layer); border-radius: var(--radius-sm);
+  padding: var(--sp-2) var(--sp-3); font-style: italic; line-height: 1.5;
+}
+
+/* Review mode */
+.review-mode .goal-notes-toggle { display:none !important; }
+.review-mode .goal-notes        { display:none !important; }
+.review-mode .goal-notes-text   { display:block; }
+.review-mode .goal-check        { display:none; }
+.review-mode .goal-body         { padding-left:0; }
+.review-mode .footer-controls   { display:none; }
+
+/* Collapsible later section */
+.collapsible-heading {
+  display: flex; align-items: center; gap: var(--sp-3);
+  cursor: pointer; margin-bottom: var(--sp-4); user-select: none;
+}
+.collapsible-toggle-icon { transition: transform 0.2s; color: var(--content-subtle); }
+.collapsible-heading.open .collapsible-toggle-icon { transform: rotate(90deg); }
+.collapsible-content { display: none; }
+.collapsible-content.open { display:flex; flex-direction:column; gap:var(--sp-4); }
+
+/* ── Settings Modal ───────────────────────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 100;
+  padding: var(--sp-4);
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.hidden { display: none; }
+.modal {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 8px;
+  width: 100%; max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+}
+.modal-header {
+  padding: var(--sp-5) var(--sp-6) var(--sp-4);
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: var(--content-strong); }
+.modal-close {
+  width: 28px; height: 28px;
+  border: none; background: none;
+  color: var(--content-subtle); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 4px;
+  font-size: 18px; line-height: 1;
+}
+.modal-close:hover { background: var(--bg-hover); color: var(--content-default); }
+.modal-body { padding: var(--sp-5) var(--sp-6); display: flex; flex-direction: column; gap: var(--sp-5); }
+.modal-section {}
+.modal-section-label {
+  font-family: var(--font-label); font-size: 10px; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--content-subtle);
+  margin-bottom: var(--sp-3); display: block;
+}
+.form-group { margin-bottom: var(--sp-3); }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--content-default); display: block; margin-bottom: 5px; }
+.form-hint { font-size: 11px; color: var(--content-subtle); margin-top: 4px; line-height: 1.4; }
+.form-hint a { color: var(--product-primary); }
+.form-input {
+  width: 100%; height: 36px;
+  background: var(--bg-layer);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  color: var(--content-default);
+  font-family: var(--font-ui); font-size: 13px;
+  padding: 0 var(--sp-3); outline: none;
+  transition: border-color 0.15s;
+}
+.form-input:focus { border-color: var(--product-primary); }
+.form-input::placeholder { color: var(--content-subtle); }
+.form-row-split { display: flex; gap: var(--sp-2); align-items: flex-start; }
+.form-row-split .form-input { flex: 1; }
+.btn-secondary {
+  height: 36px; padding: 0 var(--sp-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-default);
+  background: var(--bg-surface); color: var(--content-default);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  display: flex; align-items: center; gap: 5px;
+  transition: background 0.15s;
+}
+.btn-secondary:hover { background: var(--bg-hover); border-color: var(--product-primary); }
+.modal-divider { height: 1px; background: var(--border-subtle); margin: 0 var(--sp-6); }
+.modal-footer {
+  padding: var(--sp-4) var(--sp-6) var(--sp-5);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--sp-3);
+}
+.btn-primary {
+  height: 36px; padding: 0 var(--sp-5);
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--product-primary); color: #fff;
+  font-family: var(--font-ui); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s;
+}
+.btn-primary:hover { background: #005FC8; }
+.btn-danger {
+  height: 34px; padding: 0 var(--sp-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--status-alert-border);
+  background: transparent; color: var(--status-alert);
+  font-family: var(--font-ui); font-size: 12px; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+  transition: background 0.15s;
+}
+.btn-danger:hover { background: var(--status-alert-bg); }
+.danger-zone { display: flex; align-items: center; gap: var(--sp-2); }
+
+/* ── Toast ────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: var(--sp-6); right: var(--sp-6);
+  max-width: 340px; min-width: 200px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: 6px;
+  padding: var(--sp-3) var(--sp-4);
+  font-size: 13px; color: var(--content-default);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 200;
+  display: flex; align-items: flex-start; gap: var(--sp-2);
+  animation: slideUp 0.2s ease;
+  line-height: 1.4;
+}
+.toast.hidden { display: none; }
+@keyframes slideUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+.toast-icon { flex-shrink: 0; font-size: 14px; margin-top: 1px; }
+.toast-body { flex: 1; }
+.toast-action { font-size: 12px; font-weight: 600; color: var(--product-primary); cursor: pointer; margin-top: 3px; display: block; }
+.toast-action:hover { color: var(--product-primary-l1); }
+.toast-dismiss { background:none; border:none; color:var(--content-subtle); cursor:pointer; font-size:16px; line-height:1; padding:0; flex-shrink:0; }
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+.footer-controls {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--sp-3); margin-top: var(--sp-8);
+  padding-top: var(--sp-5); border-top: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+}
+.footer-hint {
+  font-family: var(--font-label); font-size: 10px;
+  letter-spacing: 0.8px; text-transform: uppercase; color: var(--content-subtle);
+}
+.footer-actions { display:flex; gap:var(--sp-2); }
+
+/* ── Print ────────────────────────────────────────────────────────── */
+@media print {
+  body { background:#fff; color:#000; }
+  .header-actions,.footer-controls,.goal-notes-toggle,.goal-notes,.tabs,.sync-badge,
+  .modal-overlay,.toast { display:none !important; }
+  .goal-notes-text { display:block !important; font-style:italic; color:#444; }
+  .goal-card { break-inside:avoid; border:1px solid #ccc; }
+  .collapsible-content { display:flex !important; }
+  .tab-content { display:block !important; }
+  .progress-bar-wrap { display:none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Settings Modal -->
+<div class="modal-overlay hidden" id="settings-overlay">
+  <div class="modal" role="dialog" aria-label="Sync settings">
+    <div class="modal-header">
+      <span class="modal-title">Sync Settings</span>
+      <button class="modal-close" onclick="closeSettings()" aria-label="Close">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="modal-section">
+        <span class="modal-section-label">Your identity</span>
+        <div class="form-group">
+          <label class="form-label" for="input-name">Display name</label>
+          <input class="form-input" id="input-name" type="text" placeholder="e.g. Andre" />
+          <p class="form-hint">Used to show who last edited the tracker.</p>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <span class="modal-section-label">GitHub sync</span>
+        <div class="form-group">
+          <label class="form-label" for="input-pat">Personal Access Token</label>
+          <input class="form-input" id="input-pat" type="password" placeholder="github_pat_…" autocomplete="off" />
+          <p class="form-hint">
+            Needs <strong>gist: read + write</strong> scope only.
+            <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">Create fine-grained token →</a>
+          </p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-gist">Gist ID</label>
+          <div class="form-row-split">
+            <input class="form-input" id="input-gist" type="text" placeholder="Paste existing Gist ID or create one below" />
+            <button class="btn-secondary" onclick="createNewGist()">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="2" x2="8" y2="14"/><line x1="2" y1="8" x2="14" y2="8"/></svg>
+              New Gist
+            </button>
+          </div>
+          <p class="form-hint">Andre creates the Gist first, then shares the ID with Matias out of band. Both connect with their own PAT.</p>
+        </div>
+      </div>
+
+      <div id="settings-status" style="display:none; padding:var(--sp-3); border-radius:4px; font-size:12px;"></div>
+    </div>
+    <div class="modal-divider"></div>
+    <div class="modal-footer">
+      <div class="danger-zone">
+        <button class="btn-danger" onclick="clearCreds()">Clear credentials</button>
+        <button class="btn-danger" onclick="resetAllData()">Reset data</button>
+      </div>
+      <button class="btn-primary" onclick="saveSettings()">Save &amp; sync</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast hidden" id="toast-el">
+  <span class="toast-icon" id="toast-icon"></span>
+  <div class="toast-body">
+    <span id="toast-msg"></span>
+    <span class="toast-action" id="toast-action" style="display:none"></span>
+  </div>
+  <button class="toast-dismiss" onclick="hideToast()" aria-label="Dismiss">×</button>
+</div>
+
+<div class="app-shell">
+
+  <!-- Header -->
+  <header class="header">
+    <div>
+      <div class="header-eyebrow">FanDuel Formation DS · 2026</div>
+      <h1 class="header-title">Goal Tracker</h1>
+      <div class="header-subtitle" id="header-subtitle">Andre Barros · <span>Design System Engineer</span></div>
+      <div class="header-date" id="header-date"></div>
+    </div>
+    <div class="header-actions">
+      <span class="sync-badge offline" id="sync-badge">
+        <span class="sync-dot"></span>
+        <span id="sync-label">No sync</span>
+      </span>
+      <a class="btn-text" id="figma-make-btn" target="_blank" rel="noopener" style="display:none">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="5" height="5" rx="1"/><rect x="9" y="2" width="5" height="5" rx="1"/><rect x="2" y="9" width="5" height="5" rx="1"/><circle cx="11.5" cy="11.5" r="2.5"/></svg>
+        Figma Make
+      </a>
+      <button class="btn-text" id="review-btn" onclick="toggleReview()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 8s3-5 7-5 7 5 7 5-3 5-7 5-7-5-7-5z"/><circle cx="8" cy="8" r="2"/></svg>
+        Review
+      </button>
+      <button class="btn-text" onclick="window.print()">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 6 4 2 12 2 12 6"/><rect x="1" y="6" width="14" height="8" rx="1"/><rect x="4" y="11" width="8" height="3"/></svg>
+        Print
+      </button>
+      <button class="btn-icon" onclick="openSettings()" title="Sync settings">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="2"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+      </button>
+      <button class="btn-icon" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">
+        <span id="theme-icon">☀️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Stats -->
+  <div class="stats-strip">
+    <div class="stat-tile"><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total Goals</div></div>
+    <div class="stat-tile"><div class="stat-value accent" id="stat-active">—</div><div class="stat-label">Active</div></div>
+    <div class="stat-tile"><div class="stat-value positive" id="stat-done">—</div><div class="stat-label">Completed</div></div>
+    <div class="stat-tile"><div class="stat-value accent" id="stat-pct">—</div><div class="stat-label">Progress</div></div>
+  </div>
+  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="progress-bar" style="width:0%"></div></div>
+
+  <!-- Tabs -->
+  <div class="tabs" role="tablist">
+    <button class="tab-btn active" role="tab" onclick="switchTab('personal')" id="tab-btn-personal">
+      My Goals <span class="tab-count" id="tc-personal">0</span>
+    </button>
+    <button class="tab-btn" role="tab" onclick="switchTab('team')" id="tab-btn-team">
+      Team Goals <span class="tab-count" id="tc-team">0</span>
+    </button>
+    <button class="tab-btn" role="tab" onclick="switchTab('org')" id="tab-btn-org">
+      Org Goals <span class="tab-count" id="tc-org">0</span>
+    </button>
+  </div>
+
+  <!-- Personal tab -->
+  <div class="tab-content active" id="tab-personal">
+    <div class="section-heading"><h2>Q1 Priority</h2><div class="section-line"></div></div>
+    <div class="goals-grid" id="q1-goals"></div>
+
+    <div class="collapsible-heading" id="later-toggle" onclick="toggleLater()">
+      <svg class="collapsible-toggle-icon" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 3 11 8 6 13"/></svg>
+      <h2>Later Quarters</h2>
+      <div class="section-line"></div>
+    </div>
+    <div class="collapsible-content" id="later-goals"></div>
+  </div>
+
+  <!-- Team tab -->
+  <div class="tab-content" id="tab-team">
+    <div class="section-heading"><h2>Formation DS · Team Objectives</h2><div class="section-line"></div></div>
+    <div class="goals-grid" id="team-goals"></div>
+  </div>
+
+  <!-- Org tab -->
+  <div class="tab-content" id="tab-org">
+    <div class="section-heading"><h2>FanDuel · Organisational Goals</h2><div class="section-line"></div></div>
+    <div class="goals-grid" id="org-goals"></div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer-controls">
+    <span class="footer-hint" id="footer-sync-hint">Auto-saved locally</span>
+    <div class="footer-actions">
+      <button class="btn-danger" onclick="resetAllData()">
+        <svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M1 10A7 7 0 1 0 3.5 3.5"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+
+</div><!-- /app-shell -->
+
+<script>
+/* ── Config ─────────────────────────────────────────────────────── */
+const FIGMA_MAKE_URL = ''; // Paste your Figma Make URL here once created
+
+const STORAGE_KEY  = 'formation-goals-v2';
+const CREDS_KEY    = 'formation-goals-creds';
+const GIST_API     = 'https://api.github.com/gists';
+const GIST_FILE    = 'formation-goals-v2.json';
+const POLL_INTERVAL = 30000;
+
+/* ── Seed data ──────────────────────────────────────────────────── */
+const SEED_GOALS = [
+  // — Personal / Q1 —
+  { id:'design-lint', scope:'personal', title:'Design Lint Figma Plugin', stream:'AI × DS Readiness', objective:'Obj 3 — AI-Ready DS', quarter:'Q1', kr:'Direct KR — Lint plugin officially launched by Q1', status:'active', notes:'', callout:{ text:'This is the kind of thing that makes Formation adoption genuinely frictionless — ship it.', by:'Kevin' } },
+  { id:'library-arch', scope:'personal', title:'Library Architecture Investigation', stream:'AI × DS Readiness', objective:'Obj 3 — AI-Ready DS', quarter:'Q1', kr:'Direct KR — Architecture decision documented and socialised by Q1', status:'active', notes:'', callout:null },
+  { id:'communicate-value', scope:'personal', title:'Communicate Value (numbers + no jargon)', stream:'AI Prompting Guardrails', objective:'Obj 2 — Formation Consumption', quarter:'Q1', kr:'Direct KR — Monthly metric posted + stakeholder read-out by end of Q1', status:'active', notes:'', callout:{ text:'Stop talking about components, start talking about outcomes. The numbers are there — use them.', by:'Matias' } },
+  { id:'make-info-accessible', scope:'personal', title:'Make Formation Info Easy to Access', stream:'AI × DS Consumption', objective:'Obj 2 — Formation Consumption', quarter:'Q1', kr:'Supports KR — Single source-of-truth doc shipped and linked from all entry points', status:'active', notes:'', callout:null },
+  // — Personal / Later —
+  { id:'teams-day-to-day', scope:'personal', title:'Teams Using Tools Day-to-Day', stream:'AI × DS Consumption', objective:'Obj 2 — Formation Consumption', quarter:'Q2–Q3', kr:'Milestone — 3+ product teams actively using Formation MCP / plugin in their workflow', status:'upcoming', notes:'', callout:null },
+  { id:'recipe-creation', scope:'personal', title:'Recipe Creation via Figma/Storybook MCP', stream:'AI × DS Consumption', objective:'Obj 3 — AI-Ready DS', quarter:'Q3', kr:'Milestone — Recipe authoring flow live in Storybook MCP by Q3', status:'upcoming', notes:'', callout:null },
+  { id:'translation-tooling', scope:'personal', title:'Translation Tooling Investigation', stream:'AI × DS Consumption', objective:'Obj 3 — AI-Ready DS', quarter:'Q2+', kr:'No explicit KR — exploratory spike, output is a brief', status:'no-kr', notes:'', callout:null },
+  // — Team —
+  { id:'team-adoption', scope:'team', title:'Formation v2 Adoption Across Product Squads', stream:'Formation DS · Team', objective:'Obj 2 — DS Consumption', quarter:'Q1–Q2', kr:'KR — 5+ product squads consistently using Formation v2 components', status:'active', notes:'', callout:null },
+  { id:'team-storybook-mcp', scope:'team', title:'Storybook MCP Rollout', stream:'Formation DS · Team', objective:'Obj 3 — AI-Ready DS', quarter:'Q1', kr:'KR — MCP server live and documented for all squads by Q1', status:'active', notes:'', callout:null },
+  { id:'team-doc-coverage', scope:'team', title:'Component Documentation Coverage', stream:'Formation DS · Team', objective:'Obj 2 — DS Consumption', quarter:'Q2', kr:'KR — 100% of Formation components have usage examples in Storybook', status:'upcoming', notes:'', callout:null },
+  { id:'team-token-audit', scope:'team', title:'Token Misuse Audit', stream:'Formation DS · Team', objective:'Obj 3 — AI-Ready DS', quarter:'Q1', kr:'KR — Audit complete, top 10 violations reported and resolved', status:'active', notes:'', callout:null },
+  // — Org —
+  { id:'org-ai-first', scope:'org', title:'AI-First Product Development', stream:'FanDuel · Strategic', objective:'2026 Priority', quarter:'2026', kr:'KR — 50% of product squads using AI-assisted workflows by year end', status:'active', notes:'', callout:null },
+  { id:'org-design-consistency', scope:'org', title:'Cross-Platform Design Consistency', stream:'FanDuel · Strategic', objective:'2026 Priority', quarter:'2026', kr:'KR — Formation token coverage across iOS, Android, and Web', status:'upcoming', notes:'', callout:null },
+  { id:'org-dx', scope:'org', title:'Developer Experience Improvements', stream:'FanDuel · Strategic', objective:'2026 Priority', quarter:'Q1–Q4', kr:'KR — DORA metrics improve by 20% across engineering', status:'active', notes:'', callout:null },
+  { id:'org-a11y', scope:'org', title:'Accessibility Compliance (WCAG 2.1 AA)', stream:'FanDuel · Compliance', objective:'2026 Compliance', quarter:'Q2', kr:'KR — WCAG 2.1 AA coverage on all new product surfaces', status:'upcoming', notes:'', callout:null },
+];
+
+/* ── State ──────────────────────────────────────────────────────── */
+let state = {
+  schemaVersion: 2,
+  theme: 'dark',
+  activeScope: 'personal',
+  laterOpen: false,
+  reviewMode: false,
+  displayName: 'Andre',
+  lastEditedBy: 'Andre',
+  lastEditedAt: '',
+  goals: [],
+};
+
+/* ── Credentials (not synced — device-local) ────────────────────── */
+function getCreds() {
+  try { return JSON.parse(localStorage.getItem(CREDS_KEY)) || {}; } catch { return {}; }
+}
+function saveCreds(c) { localStorage.setItem(CREDS_KEY, JSON.stringify(c)); }
+
+/* ── Schema migration ───────────────────────────────────────────── */
+function migrate(saved) {
+  if (!saved.schemaVersion || saved.schemaVersion < 2) {
+    (saved.goals || []).forEach(g => { if (!g.scope) g.scope = 'personal'; });
+    saved.schemaVersion = 2;
+  }
+  return saved;
+}
+
+/* ── Persist / load local ───────────────────────────────────────── */
+function loadLocal() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const saved = migrate(JSON.parse(raw));
+    state.theme       = saved.theme || 'dark';
+    state.activeScope = saved.activeScope || 'personal';
+    state.laterOpen   = saved.laterOpen || false;
+    state.displayName = saved.displayName || 'Andre';
+    state.lastEditedBy = saved.lastEditedBy || state.displayName;
+    state.lastEditedAt = saved.lastEditedAt || '';
+    state.goals = SEED_GOALS.map(seed => {
+      const s = (saved.goals || []).find(g => g.id === seed.id);
+      return s ? { ...seed, status: s.status, notes: s.notes } : { ...seed };
+    });
+    return true;
+  } catch { return false; }
+}
+
+function saveLocal() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    schemaVersion: state.schemaVersion,
+    theme: state.theme,
+    activeScope: state.activeScope,
+    laterOpen: state.laterOpen,
+    displayName: state.displayName,
+    lastEditedBy: state.lastEditedBy,
+    lastEditedAt: state.lastEditedAt,
+    goals: state.goals.map(g => ({ id: g.id, scope: g.scope, status: g.status, notes: g.notes })),
+  }));
+}
+
+/* ── Gist sync ──────────────────────────────────────────────────── */
+let saveTimer = null;
+let pollTimer = null;
+
+function scheduleSave() {
+  saveLocal();
+  const creds = getCreds();
+  if (!creds.pat || !creds.gistId) return;
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveRemote, 800);
+}
+
+async function loadRemote() {
+  const { pat, gistId } = getCreds();
+  if (!pat || !gistId) return null;
+  setSyncBadge('syncing', 'Syncing…');
+  try {
+    const r = await fetch(`${GIST_API}/${gistId}`, {
+      headers: { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!r.ok) throw new Error(`GitHub API ${r.status}`);
+    const data = await r.json();
+    const content = data.files[GIST_FILE]?.content;
+    if (!content) { setSyncBadge('error', 'No data in Gist'); return null; }
+    setSyncBadge('synced', 'Synced');
+    return JSON.parse(content);
+  } catch (e) {
+    setSyncBadge('error', 'Sync error');
+    showToast('⚠️', `Sync error: ${e.message}`);
+    return null;
+  }
+}
+
+async function saveRemote() {
+  const { pat, gistId } = getCreds();
+  if (!pat || !gistId) return;
+  state.lastEditedBy = state.displayName;
+  state.lastEditedAt = new Date().toISOString();
+  saveLocal();
+  setSyncBadge('syncing', 'Saving…');
+  try {
+    const payload = { files: { [GIST_FILE]: { content: JSON.stringify(state, null, 2) } } };
+    const r = await fetch(`${GIST_API}/${gistId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `token ${pat}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!r.ok) throw new Error(`GitHub API ${r.status}`);
+    setSyncBadge('synced', 'Saved ✓');
+    updateFooterHint();
+  } catch (e) {
+    setSyncBadge('error', 'Save failed');
+    showToast('⚠️', `Save failed: ${e.message}`);
+  }
+}
+
+async function createNewGist() {
+  const patVal = document.getElementById('input-pat').value.trim();
+  if (!patVal) { setModalStatus('error', 'Enter your PAT first.'); return; }
+  setModalStatus('info', 'Creating Gist…');
+  try {
+    const seed = JSON.stringify({ ...state, goals: state.goals.map(g => ({ id:g.id, scope:g.scope, status:g.status, notes:g.notes })) }, null, 2);
+    const r = await fetch(GIST_API, {
+      method: 'POST',
+      headers: { Authorization: `token ${patVal}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: 'Formation 2026 Goal Tracker', public: false, files: { [GIST_FILE]: { content: seed } } }),
+    });
+    if (!r.ok) throw new Error(`GitHub API ${r.status}`);
+    const data = await r.json();
+    document.getElementById('input-gist').value = data.id;
+    setModalStatus('success', `Gist created: ${data.id} — share this ID with Matias.`);
+  } catch (e) {
+    setModalStatus('error', `Failed: ${e.message}`);
+  }
+}
+
+async function pollRemote() {
+  const { pat, gistId } = getCreds();
+  if (!pat || !gistId) return;
+  try {
+    const r = await fetch(`${GIST_API}/${gistId}`, {
+      headers: { Authorization: `token ${pat}`, Accept: 'application/vnd.github.v3+json' },
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    const content = data.files[GIST_FILE]?.content;
+    if (!content) return;
+    const remote = JSON.parse(content);
+    const remoteTime = new Date(remote.lastEditedAt || 0).getTime();
+    const localTime  = new Date(state.lastEditedAt  || 0).getTime();
+    if (remoteTime > localTime && remote.lastEditedBy !== state.displayName) {
+      showToast('🔄', `${remote.lastEditedBy} updated the tracker.`, 'Refresh now', () => {
+        applyRemoteState(remote);
+        renderAll(); updateStats(); updateTabCounts();
+      });
+    }
+  } catch { /* silent */ }
+}
+
+function applyRemoteState(remote) {
+  if (!remote?.goals) return;
+  state.lastEditedAt = remote.lastEditedAt;
+  state.lastEditedBy = remote.lastEditedBy;
+  state.goals = SEED_GOALS.map(seed => {
+    const s = (remote.goals || []).find(g => g.id === seed.id);
+    return s ? { ...seed, status: s.status, notes: s.notes } : { ...seed };
+  });
+  saveLocal();
+  setSyncBadge('synced', 'Synced');
+}
+
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(pollRemote, POLL_INTERVAL);
+}
+function stopPolling() { clearInterval(pollTimer); pollTimer = null; }
+
+/* ── Theme ──────────────────────────────────────────────────────── */
+function applyTheme() {
+  document.documentElement.setAttribute('data-mode', state.theme);
+  document.getElementById('theme-icon').textContent = state.theme === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  state.theme = state.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(); scheduleSave();
+}
+
+/* ── Tabs ───────────────────────────────────────────────────────── */
+function switchTab(scope) {
+  state.activeScope = scope;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById(`tab-btn-${scope}`).classList.add('active');
+  document.getElementById(`tab-${scope}`).classList.add('active');
+  scheduleSave();
+}
+
+function updateTabCounts() {
+  ['personal','team','org'].forEach(scope => {
+    const count = state.goals.filter(g => g.scope === scope).length;
+    document.getElementById(`tc-${scope}`).textContent = count;
+  });
+}
+
+/* ── Collapsible ────────────────────────────────────────────────── */
+function toggleLater() {
+  state.laterOpen = !state.laterOpen;
+  document.getElementById('later-toggle').classList.toggle('open', state.laterOpen);
+  document.getElementById('later-goals').classList.toggle('open', state.laterOpen);
+  scheduleSave();
+}
+
+/* ── Review mode ────────────────────────────────────────────────── */
+function toggleReview() {
+  state.reviewMode = !state.reviewMode;
+  document.body.classList.toggle('review-mode', state.reviewMode);
+  const btn = document.getElementById('review-btn');
+  btn.classList.toggle('active', state.reviewMode);
+}
+
+/* ── Goal interactions ──────────────────────────────────────────── */
+const STATUS_CYCLE  = { active:'done', done:'active', upcoming:'done', 'no-kr':'done' };
+const PILL_CLASS    = { active:'pill-active', done:'pill-done', upcoming:'pill-upcoming', 'no-kr':'pill-no-kr' };
+const PILL_LABEL    = { active:'Active', done:'Done', upcoming:'Upcoming', 'no-kr':'No KR' };
+
+function tickGoal(id) {
+  const g = state.goals.find(x => x.id === id);
+  if (!g) return;
+  g.status = STATUS_CYCLE[g.status] || 'active';
+  scheduleSave();
+  refreshCard(id);
+  updateStats();
+}
+
+function saveNotes(id, value) {
+  const g = state.goals.find(x => x.id === id);
+  if (!g) return;
+  g.notes = value;
+  const el = document.getElementById(`notes-text-${id}`);
+  if (el) el.textContent = value || 'No notes yet.';
+  scheduleSave();
+}
+
+function toggleNotes(id) {
+  const btn  = document.getElementById(`notes-btn-${id}`);
+  const area = document.getElementById(`notes-area-${id}`);
+  if (!btn || !area) return;
+  const open = area.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  btn.querySelector('span').textContent = open ? (area.querySelector('textarea').value ? 'Notes' : 'Add notes') : (state.goals.find(x=>x.id===id)?.notes ? 'Notes' : 'Add notes');
+}
+
+/* ── Rendering ──────────────────────────────────────────────────── */
+function cardHTML(g) {
+  const isDone = g.status === 'done';
+  const hasNotes = !!g.notes;
+  const callout = g.callout
+    ? `<div class="goal-callout">"${g.callout.text}"<cite>— ${g.callout.by}</cite></div>` : '';
+  const checkInner = isDone
+    ? `<svg width="11" height="11" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="2 8 6 12 14 4"/></svg>` : '';
+  return `
+<div class="goal-card${isDone?' done':''}" id="card-${g.id}">
+  <div class="goal-card-header">
+    <button class="goal-check" onclick="tickGoal('${g.id}')" title="Toggle completion" aria-label="Toggle goal completion">${checkInner}</button>
+    <div class="goal-meta">
+      <div class="goal-stream">${g.stream} · ${g.objective}</div>
+      <div class="goal-title">${g.title}</div>
+    </div>
+    <span class="pill ${PILL_CLASS[g.status]}" onclick="tickGoal('${g.id}')" title="Click to cycle status">
+      <span class="pill-dot"></span>${PILL_LABEL[g.status]}
+    </span>
+  </div>
+  <div class="goal-body">
+    <div class="goal-kr"><strong>KR:</strong> ${g.kr}</div>
+    ${callout}
+    <button class="goal-notes-toggle${hasNotes?' open':''}" id="notes-btn-${g.id}" onclick="toggleNotes('${g.id}')">
+      <svg width="9" height="9" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 3 11 8 6 13"/></svg>
+      <span>${hasNotes ? 'Notes' : 'Add notes'}</span>
+    </button>
+    <div class="goal-notes${hasNotes?' open':''}" id="notes-area-${g.id}">
+      <textarea placeholder="Context, blockers, progress…" onblur="saveNotes('${g.id}', this.value)">${g.notes||''}</textarea>
+    </div>
+    <div class="goal-notes-text" id="notes-text-${g.id}">${g.notes || 'No notes yet.'}</div>
+  </div>
+</div>`;
+}
+
+function refreshCard(id) {
+  const g  = state.goals.find(x => x.id === id);
+  const el = document.getElementById(`card-${g?.id}`);
+  if (!g || !el) return;
+  el.outerHTML = cardHTML(g);
+}
+
+function renderAll() {
+  const byScope = scope => state.goals.filter(g => g.scope === scope);
+  document.getElementById('q1-goals').innerHTML   = byScope('personal').filter(g => g.quarter==='Q1').map(cardHTML).join('');
+  document.getElementById('later-goals').innerHTML = byScope('personal').filter(g => g.quarter!=='Q1').map(cardHTML).join('');
+  document.getElementById('team-goals').innerHTML  = byScope('team').map(cardHTML).join('');
+  document.getElementById('org-goals').innerHTML   = byScope('org').map(cardHTML).join('');
+}
+
+/* ── Stats ──────────────────────────────────────────────────────── */
+function updateStats() {
+  const total  = state.goals.length;
+  const done   = state.goals.filter(g => g.status === 'done').length;
+  const active = state.goals.filter(g => g.status === 'active').length;
+  const pct    = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('stat-total').textContent  = total;
+  document.getElementById('stat-active').textContent = active;
+  document.getElementById('stat-done').textContent   = done;
+  document.getElementById('stat-pct').textContent    = pct + '%';
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+/* ── Sync UI ────────────────────────────────────────────────────── */
+function setSyncBadge(state_, label) {
+  const el = document.getElementById('sync-badge');
+  el.className = `sync-badge ${state_}`;
+  document.getElementById('sync-label').textContent = label;
+}
+
+function updateFooterHint() {
+  const { gistId } = getCreds();
+  const el = document.getElementById('footer-sync-hint');
+  if (gistId) {
+    const ts = state.lastEditedAt ? new Date(state.lastEditedAt).toLocaleTimeString() : '?';
+    el.textContent = `Last synced ${ts} · by ${state.lastEditedBy}`;
+  } else {
+    el.textContent = 'Auto-saved locally';
+  }
+}
+
+/* ── Toast ──────────────────────────────────────────────────────── */
+let toastTimer = null;
+function showToast(icon, message, actionLabel, actionFn) {
+  clearTimeout(toastTimer);
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent  = message;
+  const act = document.getElementById('toast-action');
+  if (actionLabel && actionFn) {
+    act.textContent = actionLabel; act.style.display = 'block';
+    act.onclick = () => { actionFn(); hideToast(); };
+  } else {
+    act.style.display = 'none';
+  }
+  document.getElementById('toast-el').classList.remove('hidden');
+  toastTimer = setTimeout(hideToast, 7000);
+}
+function hideToast() {
+  document.getElementById('toast-el').classList.add('hidden');
+  clearTimeout(toastTimer);
+}
+
+/* ── Settings modal ─────────────────────────────────────────────── */
+function openSettings() {
+  const creds = getCreds();
+  document.getElementById('input-name').value  = state.displayName || '';
+  document.getElementById('input-pat').value   = creds.pat  || '';
+  document.getElementById('input-gist').value  = creds.gistId || '';
+  setModalStatus('', '');
+  document.getElementById('settings-overlay').classList.remove('hidden');
+}
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.add('hidden');
+}
+async function saveSettings() {
+  const name   = document.getElementById('input-name').value.trim();
+  const pat    = document.getElementById('input-pat').value.trim();
+  const gistId = document.getElementById('input-gist').value.trim();
+  if (name) { state.displayName = name; }
+  saveCreds({ pat, gistId });
+  saveLocal();
+  if (pat && gistId) {
+    setModalStatus('info', 'Connecting…');
+    const remote = await loadRemote();
+    if (remote) {
+      const remoteTime = new Date(remote.lastEditedAt || 0).getTime();
+      const localTime  = new Date(state.lastEditedAt  || 0).getTime();
+      if (remoteTime > localTime) {
+        applyRemoteState(remote);
+        renderAll(); updateStats(); updateTabCounts();
+        setModalStatus('success', 'Connected! Loaded remote state.');
+      } else {
+        await saveRemote();
+        setModalStatus('success', 'Connected and synced your local state to Gist.');
+      }
+      startPolling();
+      updateFooterHint();
+    }
+  } else {
+    closeSettings();
+  }
+}
+function setModalStatus(type, msg) {
+  const el = document.getElementById('settings-status');
+  if (!msg) { el.style.display = 'none'; return; }
+  const colors = { info:'var(--status-info-bg)', success:'var(--status-positive-bg)', error:'var(--status-alert-bg)' };
+  const text   = { info:'var(--status-info)', success:'var(--status-positive)', error:'var(--status-alert)' };
+  el.style.display    = 'block';
+  el.style.background = colors[type] || 'var(--bg-layer)';
+  el.style.color      = text[type]   || 'var(--content-default)';
+  el.style.border     = `1px solid currentColor`;
+  el.textContent = msg;
+}
+function clearCreds() {
+  if (!confirm('Clear GitHub credentials from this device?')) return;
+  saveCreds({});
+  stopPolling();
+  setSyncBadge('offline', 'No sync');
+  closeSettings();
+  showToast('🗑️', 'Credentials cleared.');
+}
+function resetAllData() {
+  if (!confirm('Reset all goal data? This clears notes and statuses — only on this device.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  state.goals = SEED_GOALS.map(s => ({ ...s }));
+  state.reviewMode = false;
+  state.laterOpen = false;
+  document.body.classList.remove('review-mode');
+  renderAll(); updateStats(); updateTabCounts();
+  scheduleSave();
+  closeSettings();
+}
+
+/* ── Keyboard & overlay close ───────────────────────────────────── */
+document.getElementById('settings-overlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('settings-overlay')) closeSettings();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeSettings();
+});
+
+/* ── Figma Make link ────────────────────────────────────────────── */
+function initFigmaLink() {
+  if (!FIGMA_MAKE_URL) return;
+  const btn = document.getElementById('figma-make-btn');
+  btn.href = FIGMA_MAKE_URL;
+  btn.style.display = 'inline-flex';
+}
+
+/* ── Date ───────────────────────────────────────────────────────── */
+function renderDate() {
+  document.getElementById('header-date').textContent =
+    new Date().toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+}
+
+/* ── Init ───────────────────────────────────────────────────────── */
+(async function init() {
+  const hadLocal = loadLocal();
+  if (!hadLocal) state.goals = SEED_GOALS.map(s => ({ ...s }));
+
+  applyTheme();
+  renderDate();
+  renderAll();
+  updateStats();
+  updateTabCounts();
+  initFigmaLink();
+
+  // Always start fresh — never restore review mode from storage
+  state.reviewMode = false;
+
+  // Restore active tab
+  switchTab(state.activeScope || 'personal');
+
+  // Restore collapsible
+  if (state.laterOpen) {
+    document.getElementById('later-toggle').classList.add('open');
+    document.getElementById('later-goals').classList.add('open');
+  }
+
+  // Header subtitle
+  document.getElementById('header-subtitle').innerHTML =
+    `${state.displayName} · <span>Design System Engineer</span>`;
+
+  // Sync setup
+  const { pat, gistId } = getCreds();
+  if (pat && gistId) {
+    setSyncBadge('syncing', 'Syncing…');
+    const remote = await loadRemote();
+    if (remote) {
+      const remoteTime = new Date(remote.lastEditedAt || 0).getTime();
+      const localTime  = new Date(state.lastEditedAt  || 0).getTime();
+      if (remoteTime > localTime) {
+        applyRemoteState(remote);
+        renderAll(); updateStats(); updateTabCounts();
+      } else {
+        setSyncBadge('synced', 'Synced');
+      }
+      startPolling();
+    }
+    updateFooterHint();
+  } else {
+    setSyncBadge('offline', 'No sync');
+  }
+})();
+</script>
+</body>
+</html>
