@@ -690,7 +690,7 @@ const SEED = [
 let state = {
   schemaVersion: 4, theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
   activeScope: 'personal', laterOpen: true, prevOpen: false, activityOpen: true,
-  reviewMode: false, displayName: 'Andre', lastEditedBy: 'Andre', lastEditedAt: '',
+  reviewMode: false, onboardingDismissed: false, displayName: 'Andre', lastEditedBy: 'Andre', lastEditedAt: '',
   activityLog: [], goals: [],
 };
 let filterState = (() => { try { return JSON.parse(sessionStorage.getItem('fd-filter'))||{query:'',status:'all'}; } catch { return {query:'',status:'all'}; } })();
@@ -797,12 +797,13 @@ function loadLocal() {
     state.lastEditedBy= saved.lastEditedBy || state.displayName;
     state.lastEditedAt= saved.lastEditedAt || '';
     state.activityLog = saved.activityLog  || [];
+    state.onboardingDismissed = saved.onboardingDismissed ?? !!localStorage.getItem('onboarding-dismissed');
     state.goals = mergeGoals(saved.goals);
     return true;
   } catch { return false; }
 }
 function saveLocal() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion:4, theme:state.theme, activeScope:state.activeScope, laterOpen:state.laterOpen, prevOpen:state.prevOpen, activityOpen:state.activityOpen, displayName:state.displayName, lastEditedBy:state.lastEditedBy, lastEditedAt:state.lastEditedAt, activityLog:state.activityLog, goals:state.goals }));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ schemaVersion:4, theme:state.theme, activeScope:state.activeScope, laterOpen:state.laterOpen, prevOpen:state.prevOpen, activityOpen:state.activityOpen, onboardingDismissed:state.onboardingDismissed, displayName:state.displayName, lastEditedBy:state.lastEditedBy, lastEditedAt:state.lastEditedAt, activityLog:state.activityLog, goals:state.goals }));
   bc?.postMessage({ type:'state-updated', by:TAB_ID });
 }
 
@@ -931,10 +932,10 @@ document.addEventListener('click',e=>{const dd=document.getElementById('mobile-d
 
 /* ── Onboarding ─────────────────────────────────────────────── */
 function checkOnboarding(){
-  if (getCreds().gistId||localStorage.getItem('onboarding-dismissed')) return;
+  if (state.onboardingDismissed||getCreds().gistId) return;
   document.getElementById('onboarding-banner').classList.remove('hidden');
 }
-function dismissOnboarding(){localStorage.setItem('onboarding-dismissed','1');document.getElementById('onboarding-banner').classList.add('hidden');}
+function dismissOnboarding(){state.onboardingDismissed=true;saveLocal();document.getElementById('onboarding-banner').classList.add('hidden');}
 
 /* ── Filter ─────────────────────────────────────────────────── */
 function updateFilter(){filterState.query=document.getElementById('search-input').value.toLowerCase();saveFilter();renderAll();}
@@ -1247,7 +1248,7 @@ async function saveSettings(){
       else{await saveRemote();setModalStatus('settings','success','Connected and pushed local state.');}
       startPolling();updateFooterHint();
       // Dismiss onboarding
-      localStorage.setItem('onboarding-dismissed','1');document.getElementById('onboarding-banner').classList.add('hidden');
+      state.onboardingDismissed=true;saveLocal();document.getElementById('onboarding-banner').classList.add('hidden');
     }
   } else closeSettings();
 }
